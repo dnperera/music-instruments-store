@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+mongoose.set("useFindAndModify", false);
 require("dotenv").config();
 const Schema = mongoose.Schema;
 const saltRounds = 10;
@@ -93,6 +94,24 @@ userSchema.methods.generateToken = function(callback) {
       callback(err);
     }
     callback(null, user);
+  });
+};
+
+//find and veryfiy token
+userSchema.statics.findByToken = function(token, callback) {
+  //assign current context 'this' to a variable
+  const user = this;
+  jwt.verify(token, process.env.SECRET, function(err, decodedUserId) {
+    //now check whether there is a matching user with decodedUser Id and token
+    user.findOne({ _id: decodedUserId, token: token }, function(
+      err,
+      userRecord
+    ) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, userRecord);
+    });
   });
 };
 //create the model

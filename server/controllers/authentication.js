@@ -63,3 +63,15 @@ exports.login = function(req, res, next) {
     });
   });
 };
+exports.logout = function(req, res) {
+  User.findOneAndUpdate(
+    { _id: req.user._id },
+    { token: "" },
+    (err, updatedUser) => {
+      if (err) {
+        return res.json({ success: false, err });
+      }
+      return res.status(200).json({ success: true });
+    }
+  );
+};
